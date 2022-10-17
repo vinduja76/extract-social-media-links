@@ -11,6 +11,7 @@ encoding        :UTF-8
 """
 
 import requests
+from bs4 import BeautifulSoup
 from html_to_etree import parse_html_bytes
 from extract_social_media import find_links_tree
 
@@ -18,9 +19,9 @@ from extract_social_media import find_links_tree
 SOCIAL_MEDIA = ['facebook', 'linkedin', 'twitter']
 
 
-def extract(url):   
+def extract_old(url):   
     """
-    Description: Function to social media links 
+    Description: Function to social media links using extract_social_media
     Input      : Url
     Return     : Dict containing social media as key and value as the links
     """
@@ -32,6 +33,26 @@ def extract(url):
             key = [value for value in SOCIAL_MEDIA if value in link]
             if len(key) == 0: continue
             result[key[0]] = link
+        return result
+    except Exception as error:
+        #print(f'Exception occurred in extract: {error}')
+        return None
+
+def extract(url):   
+    """
+    Description: Function to social media links 
+    Input      : Url
+    Return     : Dict containing social media as key and value as the links
+    """
+    try:
+        content = requests.get(url)
+        soup = BeautifulSoup(content.text, 'html.parser')
+        result = {}
+        for link in soup.find_all("a"):
+            data = link.get('href')
+            key = [value for value in SOCIAL_MEDIA if value in data]
+            if len(key) == 0: continue
+            result[key[0]] = data
         return result
     except Exception as error:
         #print(f'Exception occurred in extract: {error}')
